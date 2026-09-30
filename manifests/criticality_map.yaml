@@ -1,0 +1,6 @@
+criticality_levels:
+  hard_rt: HI
+  firm_rt: LO
+  soft_rt: LO
+  best_effort: LO
+

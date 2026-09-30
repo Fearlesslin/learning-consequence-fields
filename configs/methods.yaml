@@ -1,0 +1,95 @@
+mc_flex:
+  scheduling:
+    virtual_deadline_factor: 0.45
+  sidecars:
+    criticality_map: manifests/criticality_map.yaml
+
+workload_aware_mc:
+  implementation_scope: homogeneous_replay_adaptation
+  prediction:
+    update_interval_ms: 50
+    trailing_window_ms: 2000
+    cold_start_policy: nominal_stream_rate
+    future_arrivals_visible: false
+  placement:
+    policy: worst_fit_decreasing
+  allocation:
+    policy: per_partition_multiple_choice_dynamic_programming
+    capacity_units: 1000
+    service_levels: [1.0, 0.75, 0.5, 0.0]
+    utility_by_task_class: {hard_rt: 4, firm_rt: 3, soft_rt: 2, best_effort: 1}
+    hard_rt_service_fraction: 1.0
+  replay:
+    policy: causal_workload_prediction_then_partitioned_service_edf
+
+ca_edf:
+  sidecars:
+    degradation_policy: manifests/degradation_policy.yaml
+
+context_aware_gd:
+  implementation_scope: homogeneous_replay_adaptation
+  functional_dependencies:
+    - [state_estimation, control_loop]
+    - [alarm_fusion, safety_interlock]
+    - [state_estimation, process_quality_estimation]
+    - [process_quality_estimation, digital_twin_update]
+    - [anomaly_diagnosis, predictive_maintenance]
+    - [alarm_fusion, historian_write]
+    - [historian_write, batch_report]
+  context:
+    degradation_strength: 0.8
+    op_mode_severity:
+      steady: nominal
+      startup: attention
+      grade_change: alert
+      disturbance: emergency
+      fault_recovery: alert
+    alarm_severity:
+      none: nominal
+      low: attention
+      medium: alert
+      high: emergency
+      critical: emergency
+    allowed_service_levels: [1.0, 0.75, 0.5, 0.0]
+    service_fraction:
+      nominal: {hard_rt: 1.0, firm_rt: 1.0, soft_rt: 1.0, best_effort: 1.0}
+      attention: {hard_rt: 1.0, firm_rt: 1.0, soft_rt: 0.75, best_effort: 0.75}
+      alert: {hard_rt: 1.0, firm_rt: 0.75, soft_rt: 0.75, best_effort: 0.5}
+      emergency: {hard_rt: 1.0, firm_rt: 0.75, soft_rt: 0.5, best_effort: 0.0}
+  replay:
+    policy: context_priority_edf_with_dependency_closed_service_levels
+
+slack_time_management:
+  slack:
+    base_non_hard_service: 0.5
+    reclaim_threshold: 0.8
+
+casds:
+  implementation_scope: homogeneous_replay_adaptation
+  application_model:
+    applications:
+      control_safety:
+        task_types: [state_estimation, control_loop, alarm_fusion, safety_interlock]
+        edges: [[state_estimation, control_loop], [alarm_fusion, safety_interlock]]
+      process_quality:
+        task_types: [process_quality_estimation, digital_twin_update]
+        edges: [[process_quality_estimation, digital_twin_update]]
+      condition_maintenance:
+        task_types: [anomaly_diagnosis, predictive_maintenance]
+        edges: [[anomaly_diagnosis, predictive_maintenance]]
+      traceability:
+        task_types: [historian_write, batch_report]
+        edges: [[historian_write, batch_report]]
+  history:
+    execution_estimator: causal_per_stream_ewma
+    ewma_alpha: 0.1
+    cold_start: C_LO
+    update_event: completed_job_only
+  priority:
+    criticality_scores: {hard_rt: 1.0, firm_rt: 0.75, soft_rt: 0.5, best_effort: 0.25}
+    topsis_weights: {criticality: 0.8, urgency: 0.2}
+  replay:
+    policy: global_preemptive_context_aware_slack_topsis
+
+hybrid_scheduling:
+  assignment_variant: ut_sd

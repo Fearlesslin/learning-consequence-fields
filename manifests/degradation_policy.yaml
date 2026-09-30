@@ -1,0 +1,7 @@
+ca_edf:
+  service_fraction_hi_mode:
+    hard_rt: 1.0
+    firm_rt: 0.80
+    soft_rt: 0.55
+    best_effort: 0.30
+

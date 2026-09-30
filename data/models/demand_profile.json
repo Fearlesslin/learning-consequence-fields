@@ -1,0 +1,38 @@
+{
+  "median_ratio": {
+    "alarm_fusion": 0.9491357535613221,
+    "anomaly_diagnosis": 0.9642370586052761,
+    "batch_report": 0.9537288911638521,
+    "control_loop": 0.9504149423374777,
+    "digital_twin_update": 0.9592158808297415,
+    "historian_write": 0.9618844791106742,
+    "predictive_maintenance": 0.960718231155982,
+    "process_quality_estimation": 0.9606961675038661,
+    "safety_interlock": 0.9511322938385947,
+    "state_estimation": 0.9488529584317622
+  },
+  "q90_ratio": {
+    "alarm_fusion": 0.9949975582241165,
+    "anomaly_diagnosis": 1.083329321216287,
+    "batch_report": 1.0828307421362913,
+    "control_loop": 1.0,
+    "digital_twin_update": 1.0832620264991544,
+    "historian_write": 1.0834160593625435,
+    "predictive_maintenance": 1.0864741686301804,
+    "process_quality_estimation": 1.0839884519785694,
+    "safety_interlock": 1.0,
+    "state_estimation": 0.9965322206275394
+  },
+  "q95_ratio": {
+    "alarm_fusion": 1.0,
+    "anomaly_diagnosis": 1.1139662206915768,
+    "batch_report": 1.1186101483523294,
+    "control_loop": 1.0,
+    "digital_twin_update": 1.1164017093711753,
+    "historian_write": 1.1135209888046218,
+    "predictive_maintenance": 1.1181547089132293,
+    "process_quality_estimation": 1.1236667052855425,
+    "safety_interlock": 1.0,
+    "state_estimation": 1.0
+  }
+}

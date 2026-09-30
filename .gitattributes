@@ -1,0 +1,4 @@
+* text=auto
+*.joblib binary
+*.npz binary
+*.parquet binary

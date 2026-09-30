@@ -1,0 +1,120 @@
+name: Learning Consequence Fields on Protected Service Frontiers for Mixed Real-Time Scheduling
+
+paths:
+  data: data/roots
+  models: data/models
+  methods: configs/methods.yaml
+  results: results
+
+platform:
+  channels: 2
+
+roots:
+  - 4277551675
+  - 3470547961
+  - 1797615711
+  - 2323419826
+  - 3663971528
+  - 1303089026
+  - 338987291
+  - 290507618
+
+evaluation:
+  loads: [0.90, 0.95, 1.00, 1.05, 1.10, 1.15]
+  methods:
+    - mc_flex
+    - workload_aware_mc
+    - ca_edf
+    - context_aware_gd
+    - slack_time_management
+    - casds
+    - protected_frontier
+  ablations:
+    - no_reserve
+    - no_goal
+    - scalar_priority
+  controls:
+    - static_type
+    - edf_full
+    - hybrid_scheduling
+
+scheduler:
+  epsilon_service: 0.0
+  reserve_quantile: 0.95
+  laxity_band: 0.05
+
+task_catalog:
+  control_loop: {class: hard_rt, deadline_ms: 20, period_ms: 20, c_lo_ms: 3.8}
+  safety_interlock: {class: hard_rt, deadline_ms: 40, period_ms: 40, c_lo_ms: 7.2}
+  state_estimation: {class: firm_rt, deadline_ms: 80, period_ms: 80, c_lo_ms: 27.2}
+  alarm_fusion: {class: firm_rt, deadline_ms: 120, period_ms: 120, c_lo_ms: 34.8}
+  anomaly_diagnosis: {class: soft_rt, deadline_ms: 50, period_ms: 100, c_lo_ms: 17.0}
+  process_quality_estimation: {class: soft_rt, deadline_ms: 50, period_ms: 100, c_lo_ms: 21.0}
+  digital_twin_update: {class: soft_rt, deadline_ms: 50, period_ms: 100, c_lo_ms: 24.0}
+  predictive_maintenance: {class: soft_rt, deadline_ms: 50, period_ms: 100, c_lo_ms: 28.0}
+  historian_write: {class: best_effort, deadline_ms: 50, period_ms: 100, c_lo_ms: 14.0}
+  batch_report: {class: best_effort, deadline_ms: 50, period_ms: 100, c_lo_ms: 31.0}
+
+goals:
+  - goal_id: safety_first
+    weights: [0.38, 0.08, 0.18, 0.22, 0.06, 0.08]
+  - goal_id: quality_first
+    weights: [0.10, 0.28, 0.34, 0.08, 0.10, 0.10]
+  - goal_id: throughput_first
+    weights: [0.06, 0.10, 0.08, 0.12, 0.12, 0.52]
+default_goal_weights: [0.18, 0.1533333333, 0.20, 0.14, 0.0933333333, 0.2333333333]
+
+counterfactual:
+  service_levels: [0.0, 0.5, 0.75, 1.0]
+  delay_buckets_ms: [0.0, 50.0, 100.0, 250.0, 500.0, 1000.0]
+  loss_components:
+    - safety_loss
+    - quality_loss
+    - defect_escape
+    - downtime
+    - traceability_loss
+    - throughput_loss
+  tail_risk_beta: 0.0
+  coefficient_scale: 0.05
+  logit_clip: [-9.0, 12.0]
+
+features:
+  instance_categorical: [asset_type, task_role, defect_type, modality]
+  instance_numeric:
+    - payload_severity
+    - payload_ambiguity
+    - payload_spatial_extent
+    - payload_temporal_complexity
+    - payload_novelty
+    - payload_evidence_density
+  scene_categorical:
+    - process_stage
+    - operating_mode
+    - alarm_state
+    - actuation_state
+    - scene_variant
+  scene_numeric:
+    - scene_alarm
+    - scene_control
+    - scene_graph
+    - alarm_ewma_100ms
+    - alarm_slope_100ms
+    - coalarm_count_100ms
+    - time_in_mode_ms
+    - causal_alarm_score
+    - control_error_proxy
+    - graph_one_hop_activity
+    - graph_two_hop_activity
+  resource_numeric:
+    - deadline_ms
+    - period_ms
+    - c_lo_ms
+    - backlog_history_ms
+    - resource_history_utilization
+    - release_density_100ms
+    - release_density_250ms
+    - resource_ewma_250ms
+
+statistics:
+  bootstrap_replicates: 1000
+  seed: 42
